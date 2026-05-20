@@ -1,21 +1,76 @@
 'use client'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import SearchModal from '@/components/SearchModal'
 
 interface SidebarProps {
   collapsed: boolean
   onToggle: () => void
-  activeRoute: '/dashboard' | '/meetings' | '/meetings/new'
   sidebarW: number
 }
 
-export default function Sidebar({ collapsed, onToggle, activeRoute, sidebarW }: SidebarProps) {
+interface Meeting {
+  id: string
+  title: string
+  meeting_date: string | null
+  created_at: string
+}
+
+export default function Sidebar({ collapsed, onToggle, sidebarW }: SidebarProps) {
   const router = useRouter()
+  const pathname = usePathname()
+  const [meetings, setMeetings] = useState<Meeting[]>([])
+  const [initialized, setInitialized] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useState<string | null>(null)
+  const [renaming, setRenaming] = useState<string | null>(null)
+  const [renameValue, setRenameValue] = useState('')
+
+  const iconSize = collapsed ? 24 : 18
+
+  useEffect(() => {
+  fetch('/api/meetings')
+    .then(res => res.json())
+    .then(data => {
+      if (Array.isArray(data)) {
+        setMeetings(data)
+        setInitialized(true)
+      }
+    })
+    .catch(() => {})
+}, [])
+
+  useEffect(() => {
+    function handleClickOutside() { setMenuOpen(null) }
+    if (menuOpen) document.addEventListener('click', handleClickOutside)
+    return () => document.removeEventListener('click', handleClickOutside)
+  }, [menuOpen])
 
   async function handleSignOut() {
     await supabase.auth.signOut()
     router.push('/login')
+  }
+
+  async function handleDelete(meetingId: string) {
+    setMenuOpen(null)
+    await fetch(`/api/meetings/${meetingId}`, { method: 'DELETE' })
+    setMeetings(prev => prev.filter(m => m.id !== meetingId))
+    if (pathname === `/meetings/${meetingId}`) router.push('/meetings/new')
+  }
+
+  async function handleRename(meetingId: string) {
+    if (!renameValue.trim()) return
+    setMenuOpen(null)
+    setRenaming(null)
+    await fetch(`/api/meetings/${meetingId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: renameValue }),
+    })
+    setMeetings(prev => prev.map(m => m.id === meetingId ? { ...m, title: renameValue } : m))
+    setRenameValue('')
   }
 
   return (
@@ -25,21 +80,29 @@ export default function Sidebar({ collapsed, onToggle, activeRoute, sidebarW }: 
           background: #0d1128;
           border-right: 1px solid rgba(255,255,255,0.07);
           display: flex; flex-direction: column;
-          padding: 20px 12px; flex-shrink: 0;
+          padding: 16px 10px;
+          flex-shrink: 0;
           position: fixed; top: 0; left: 0; bottom: 0;
-          transition: width 0.25s ease; overflow: hidden;
+          transition: width 0.25s ease;
+          overflow: hidden;
           z-index: 50;
+          cursor: default;
         }
+        .db-sidebar.collapsed {
+          cursor: pointer;
+        }
+
         .db-sidebar-top {
           display: flex; align-items: center; justify-content: space-between;
-          margin-bottom: 28px; padding: 4px; min-width: 0;
+          margin-bottom: 20px; min-width: 0; gap: 8px;
+          flex-shrink: 0;
         }
-        .db-logo { display: flex; align-items: center; gap: 10px; overflow: hidden; min-width: 0; }
+        .db-logo { display: flex; align-items: center; gap: 10px; min-width: 0; overflow: hidden; flex: 1; }
         .db-logo-icon {
-          width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0;
+          width: 32px; height: 32px; border-radius: 10px; flex-shrink: 0;
           background: linear-gradient(135deg, #6c63ff, #a78bfa);
           display: flex; align-items: center; justify-content: center;
-          font-size: 14px; color: #fff;
+          font-size: 15px; color: #fff;
         }
         .db-logo-text {
           font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700;
@@ -47,54 +110,130 @@ export default function Sidebar({ collapsed, onToggle, activeRoute, sidebarW }: 
         }
         .db-toggle-btn {
           background: none; border: none; cursor: pointer;
-          color: rgba(255,255,255,0.35); padding: 4px; border-radius: 6px;
-          display: flex; align-items: center; justify-content: center;
+          color: rgba(255,255,255,0.35); width: 28px; height: 28px;
+          border-radius: 6px; display: flex; align-items: center; justify-content: center;
           transition: color 0.15s, background 0.15s; flex-shrink: 0;
         }
         .db-toggle-btn:hover { color: #f0f2ff; background: rgba(255,255,255,0.06); }
-        .db-toggle-btn svg { width: 18px; height: 18px; }
 
-        .db-section-label {
-          font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.35);
-          letter-spacing: 0.8px; text-transform: uppercase;
-          padding: 0 8px; margin-bottom: 6px; white-space: nowrap;
-          transition: opacity 0.2s;
+        /* Nav buttons */
+        .db-nav-btn {
+          display: flex; align-items: center; gap: 10px;
+          padding: 10px 8px; border-radius: 10px;
+          color: rgba(255,255,255,0.85); font-size: 15px;
+          transition: background 0.15s, color 0.15s; margin-bottom: 4px;
+          white-space: nowrap; overflow: hidden; min-width: 0;
+          text-decoration: none; border: none; background: none;
+          cursor: pointer; width: 100%; text-align: left;
+          font-family: 'DM Sans', sans-serif;
+          flex-shrink: 0;
         }
-        .db-nav {
-          display: flex; align-items: center; gap: 12px;
-          padding: 11px 12px; border-radius: 8px;
-          color: rgba(255,255,255,0.55); text-decoration: none; font-size: 18px;
-          transition: background 0.15s, color 0.15s; margin-bottom: 2px;
-          white-space: nowrap; overflow: hidden;
-        }
-        .db-nav:hover { background: rgba(255,255,255,0.06); color: #f0f2ff; }
-        .db-nav.active { background: rgba(108,99,255,0.15); color: #f0f2ff; font-weight: 500; }
-        .db-nav svg { width: 18px; height: 18px; flex-shrink: 0; }
+        .db-nav-btn:hover { background: rgba(255,255,255,0.06); color: #f0f2ff; }
+        .db-nav-btn.active { background: rgba(108,99,255,0.2); color: #f0f2ff; font-weight: 500; }
+        .db-nav-btn svg { flex-shrink: 0; }
+        .db-nav-label { overflow: hidden; transition: opacity 0.15s; font-size: 14px; }
 
-        .db-nav-new {
-          display: flex; align-items: center; gap: 12px;
-          padding: 11px 12px; border-radius: 8px;
-          color: rgba(255,255,255,0.55); text-decoration: none; font-size: 18px;
-          transition: background 0.15s, color 0.15s; margin-bottom: 2px;
-          white-space: nowrap; overflow: hidden;
-        }
-        .db-nav-new:hover { background: rgba(255,255,255,0.06); color: #f0f2ff; }
-        .db-nav-new.active { background: rgba(108,99,255,0.15); color: #f0f2ff; font-weight: 500; }
-        .db-nav-new svg { width: 18px; height: 18px; flex-shrink: 0; }
+        /* Divider */
+        .db-divider { height: 1px; background: rgba(255,255,255,0.07); margin: 8px 0; flex-shrink: 0; }
 
+        /* Recents section */
+        .db-recents-label {
+          font-size: 11px; font-weight: 600; letter-spacing: 1px;
+          text-transform: uppercase; color: rgba(255,255,255,0.5);
+          padding: 4px 8px 8px; white-space: nowrap;
+          transition: opacity 0.15s; flex-shrink: 0;
+        }
+
+        .db-recents-list {
+          flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 2px;
+          scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.1) transparent;
+        }
+        .db-recents-list::-webkit-scrollbar { width: 4px; }
+        .db-recents-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+        .db-recent-row {
+          position: relative; display: flex; align-items: center;
+          border-radius: 8px; flex-shrink: 0;
+        }
+        .db-recent-row:hover .db-recent-menu-btn { opacity: 1; }
+        .db-recent-item {
+          display: flex; align-items: center; gap: 8px;
+          padding: 8px 8px; border-radius: 8px;
+          color: rgba(255,255,255,0.85); font-size: 15px
+          text-decoration: none; transition: background 0.15s, color 0.15s;
+          white-space: nowrap; overflow: hidden; min-width: 0;
+          flex: 1;
+        }
+        .db-recent-item:hover { background: rgba(255,255,255,0.06); color: #f0f2ff; }
+        .db-recent-item.active { color: #f0f2ff; }
+        .db-recent-row:has(.db-recent-item.active) { background: rgba(108,99,255,0.15); }
+        .db-sidebar.collapsed .db-recent-row:has(.db-recent-item.active) { background: transparent; }
+        .db-recent-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(108,99,255,0.6); flex-shrink: 0; }
+        .db-recent-title { overflow: hidden; text-overflow: ellipsis; flex: 1; }
+        .db-recent-menu-btn {
+          opacity: 0; flex-shrink: 0;
+          background: none; border: none; cursor: pointer;
+          color: rgba(255,255,255,0.4); padding: 4px 6px;
+          border-radius: 6px; transition: opacity 0.15s, background 0.15s;
+          font-size: 14px; line-height: 1;
+        }
+        .db-recent-menu-btn:hover { background: rgba(255,255,255,0.08); color: #f0f2ff; }
+        .db-recent-dropdown {
+          position: absolute; right: 0; top: 100%;
+          background: #1a1f3a; border: 1px solid rgba(255,255,255,0.1);
+          border-radius: 10px; padding: 4px;
+          z-index: 100; min-width: 130px;
+          box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+        }
+        .db-recent-dropdown-item {
+          display: flex; align-items: center; gap: 8px;
+          padding: 8px 10px; border-radius: 6px;
+          font-size: 13px; cursor: pointer;
+          transition: background 0.15s; border: none;
+          background: none; width: 100%; text-align: left;
+          font-family: 'DM Sans', sans-serif; color: rgba(255,255,255,0.7);
+        }
+        .db-recent-dropdown-item:hover { background: rgba(255,255,255,0.06); color: #f0f2ff; }
+        .db-recent-dropdown-item.danger { color: #ff6b6b; }
+        .db-recent-dropdown-item.danger:hover { background: rgba(255,80,80,0.1); }
+        .db-rename-input {
+          flex: 1; background: rgba(255,255,255,0.06);
+          border: 1px solid rgba(108,99,255,0.4);
+          border-radius: 6px; color: #f0f2ff;
+          font-size: 13px; padding: 4px 8px;
+          font-family: 'DM Sans', sans-serif; outline: none;
+        }
+
+        .db-no-recents {
+          padding: 12px 8px; font-size: 12px;
+          color: rgba(255,255,255,0.2); text-align: center;
+        }
+
+        /* Sign out */
         .db-signout {
-          margin-top: auto; display: flex; align-items: center; gap: 12px;
-          padding: 11px 12px; border-radius: 8px; color: rgba(255,255,255,0.4);
-          font-size: 18px; cursor: pointer; transition: background 0.15s, color 0.15s;
-          border: none; background: none; width: 100%; text-align: left;
-          white-space: nowrap; overflow: hidden;
+          flex-shrink: 0;
+          display: flex; align-items: center; gap: 10px;
+          padding: 12px 8px 10px 8px;
+          color: rgba(255,255,255,0.4); font-size: 14px;
+          cursor: pointer; transition: color 0.15s;
+          border: none; border-top: 1px solid rgba(255,255,255,0.07);
+          background: none; width: 100%; text-align: left;
+          white-space: nowrap; overflow: hidden; min-width: 0;
+          font-family: 'DM Sans', sans-serif;
+          margin-top: 8px;
         }
-        .db-signout:hover { background: rgba(255,255,255,0.06); color: #f0f2ff; }
-        .db-signout svg { width: 18px; height: 18px; flex-shrink: 0; }
+        .db-signout:hover { color: #f0f2ff; background: rgba(255,255,255,0.04); }
       `}</style>
+      
+       <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
 
-      <aside className="db-sidebar" style={{ width: sidebarW }}>
-        {/* Top — logo + toggle */}
+      <aside
+        className={`db-sidebar ${collapsed ? 'collapsed' : ''}`}
+        style={{ width: sidebarW }}
+        onClick={collapsed ? onToggle : undefined}
+      >
+
+        {/* Top row */}
         <div className="db-sidebar-top">
           <div className="db-logo">
             <div className="db-logo-icon">✦</div>
@@ -102,63 +241,108 @@ export default function Sidebar({ collapsed, onToggle, activeRoute, sidebarW }: 
               MeetScribe
             </span>
           </div>
-          <button className="db-toggle-btn" onClick={onToggle} title="Toggle sidebar">
-            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <rect x="3" y="3" width="18" height="18" rx="2"/>
-              <path d="M9 3v18"/>
-            </svg>
-          </button>
+          {!collapsed && (
+            <button className="db-toggle-btn" onClick={onToggle} title="Collapse sidebar">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} width={18} height={18}>
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <path d="M9 3v18"/>
+              </svg>
+            </button>
+          )}
         </div>
 
-        {/* Nav label */}
-        <div className="db-section-label" style={{ opacity: collapsed ? 0 : 1 }}>
-          Workspace
-        </div>
-
-        {/* Nav links */}
-        <Link
-          href="/dashboard"
-          className={`db-nav ${activeRoute === '/dashboard' ? 'active' : ''}`}
-          title="Dashboard"
-        >
-          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <rect x="3" y="3" width="7" height="7" rx="1"/>
-            <rect x="14" y="3" width="7" height="7" rx="1"/>
-            <rect x="3" y="14" width="7" height="7" rx="1"/>
-            <rect x="14" y="14" width="7" height="7" rx="1"/>
-          </svg>
-          <span style={{ opacity: collapsed ? 0 : 1 }}>Dashboard</span>
-        </Link>
-
-        <Link
-          href="/meetings"
-          className={`db-nav ${activeRoute === '/meetings' ? 'active' : ''}`}
-          title="Meetings"
-        >
-          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-          </svg>
-          <span style={{ opacity: collapsed ? 0 : 1 }}>Meetings</span>
-        </Link>
-
-        <Link
-          href="/meetings/new"
-          className={`db-nav-new ${activeRoute === '/meetings/new' ? 'active' : ''}`}
-          title="New meeting"
-        >
-          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        {/* New meeting */}
+        <Link href="/meetings/new" className={`db-nav-btn ${pathname === '/meetings/new' ? 'active' : ''}`} title="New meeting">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} width={iconSize} height={iconSize}>
             <path d="M12 4v16m8-8H4"/>
           </svg>
-          <span style={{ opacity: collapsed ? 0 : 1 }}>New meeting</span>
+          <span className="db-nav-label" style={{ opacity: collapsed ? 0 : 1 }}>New meeting</span>
         </Link>
+
+        {/* Search */}
+        <button className="db-nav-btn" onClick={() => setSearchOpen(true)} title="Search">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} width={iconSize} height={iconSize}>
+            <path d="M21 21l-4.35-4.35M17 11A6 6 0 111 11a6 6 0 0116 0z"/>
+          </svg>
+          <span className="db-nav-label" style={{ opacity: collapsed ? 0 : 1 }}>Search</span>
+        </button>
+
+        <div className="db-divider" />
+
+        {/* Recents label */}
+        <div className="db-recents-label" style={{ opacity: collapsed ? 0 : 1 }}>
+          Recents
+        </div>
+
+        {/* Recents list */}
+<div className="db-recents-list">
+  {!initialized ? null : meetings.length === 0 ? (
+    <div className="db-no-recents" style={{ opacity: collapsed ? 0 : 1 }}>
+      No meetings yet
+    </div>
+  ) : (
+    meetings.map(meeting => (
+      <div key={meeting.id} className="db-recent-row">
+        {renaming === meeting.id ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 8px', flex: 1 }}>
+            <input
+              className="db-rename-input"
+              value={renameValue}
+              onChange={e => setRenameValue(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === 'Enter') handleRename(meeting.id)
+                if (e.key === 'Escape') { setRenaming(null); setMenuOpen(null) }
+              }}
+              autoFocus
+            />
+            <button onClick={() => handleRename(meeting.id)} style={{ background: '#6c63ff', border: 'none', borderRadius: 6, color: '#fff', fontSize: 12, padding: '4px 8px', cursor: 'pointer' }}>✓</button>
+          </div>
+        ) : (
+          <>
+            <Link
+              href={`/meetings/${meeting.id}`}
+              className={`db-recent-item ${pathname === `/meetings/${meeting.id}` ? 'active' : ''}`}
+              title={meeting.title}
+              onClick={() => setMenuOpen(null)}
+            >
+              <span className="db-recent-dot" style={{ flexShrink: 0, opacity: collapsed ? 0 : 1 }} />
+              <span className="db-recent-title" style={{ opacity: collapsed ? 0 : 1 }}>
+                {meeting.title}
+              </span>
+            </Link>
+            {!collapsed && (
+              <button
+                className="db-recent-menu-btn"
+                onClick={e => { e.preventDefault(); e.stopPropagation(); setMenuOpen(menuOpen === meeting.id ? null : meeting.id) }}
+              >
+                ···
+              </button>
+            )}
+            {menuOpen === meeting.id && (
+              <div className="db-recent-dropdown">
+                <button className="db-recent-dropdown-item" onClick={() => { setRenaming(meeting.id); setRenameValue(meeting.title); setMenuOpen(null) }}>
+                  ✏️ Rename
+                </button>
+                <button className="db-recent-dropdown-item danger" onClick={() => handleDelete(meeting.id)}>
+                  🗑️ Delete
+                </button>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    ))
+  )}
+</div>
 
         {/* Sign out */}
         <button className="db-signout" onClick={handleSignOut} title="Sign out">
-          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} width={iconSize} height={iconSize} style={{ flexShrink: 0 }}>
             <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
           </svg>
-          <span style={{ opacity: collapsed ? 0 : 1 }}>Sign out</span>
+          <span style={{ opacity: collapsed ? 0 : 1, overflow: 'hidden' }}>Sign out</span>
         </button>
+
       </aside>
     </>
   )

@@ -11,10 +11,10 @@ export default function LoginPage() {
   const router = useRouter()
 
   async function handleLogin() {
-    // setLoading(true)
-    // const { error } = await supabase.auth.signInWithPassword({ email, password })
-    // if (error) { alert(error.message); setLoading(false); return }
-    router.push('/dashboard')
+    setLoading(true)
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    if (error) { alert(error.message); setLoading(false); return }
+    router.push('/meetings/new')
   }
 
   return (
