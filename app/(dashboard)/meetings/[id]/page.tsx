@@ -99,57 +99,49 @@ export default function MeetingDetailPage() {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', alignItems: 'stretch' }}>
-
+           <div style={{ 
+  display: 'grid', 
+  gridTemplateColumns: '1fr 1fr', 
+  gap: '24px',
+  height: 'calc(100vh - 200px)'
+}}>
   {/* Left column */}
-  <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+  <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', overflow: 'hidden' }}>
     {meeting.ai_summary && (
-      <div className="db-section">
+      <div className="db-section" style={{ flex: 1 }}>
         <div className="db-section-label db-label-blue">Summary</div>
-        <div className="db-summary-text">{meeting.ai_summary}</div>
-      </div>
-    )}
-    {decisions.length > 0 && (
-    <div className="db-section" style={{ height: 'auto', overflow: 'visible' }}>
-        <div className="db-section-label db-label-green">Decisions</div>
-        <div className="db-decisions">
-          {decisions.map((d, i) => <span key={i} className="db-decision-chip">✓ {d}</span>)}
+        <div className="db-section-scroll">
+          <div className="db-summary-text">{meeting.ai_summary}</div>
         </div>
       </div>
     )}
+    {decisions.length > 0 && (
+      <div className="db-section" style={{ flex: 1 }}>
+        <div className="db-section-label db-label-green">Decisions</div>
+        <div className="db-section-scroll">
+          <div className="db-decisions">
+            {decisions.map((d, i) => <span key={i} className="db-decision-chip">✓ {d}</span>)}
+          </div>
+        </div>
+      </div>
+    )}
+  </div>
+
+  {/* Right column */}
+  <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', overflow: 'hidden' }}>
     {actionItems.length > 0 && (
-      <div className="db-section">
-        <div className="db-section-label db-label-amber" style={{ marginBottom: 6 }}>
-  Action items — {actionItems.filter(i => i.is_done).length}/{actionItems.length} done
-</div>
-<div style={{ 
-  height: '4px', 
-  background: 'rgba(255,255,255,0.06)', 
-  borderRadius: '99px', 
-  marginBottom: '14px',
-  overflow: 'hidden'
-}}>
-  <div style={{
-    height: '100%',
-    width: `${(actionItems.filter(i => i.is_done).length / actionItems.length) * 100}%`,
-    background: actionItems.every(i => i.is_done) ? '#22d3a5' : '#6c63ff',
-    borderRadius: '99px',
-    transition: 'width 0.4s ease',
-  }} />
-</div>
-        <div className="db-action-items">
+      <div className="db-section" style={{ flex: 1 }}>
+        <div className="db-section-label db-label-amber" style={{ marginBottom: 6, flexShrink: 0 }}>
+          Action items — {actionItems.filter(i => i.is_done).length}/{actionItems.length} done
+        </div>
+        <div style={{ height: '4px', background: 'rgba(255,255,255,0.06)', borderRadius: '99px', marginBottom: '14px', overflow: 'hidden', flexShrink: 0 }}>
+          <div style={{ height: '100%', width: `${(actionItems.filter(i => i.is_done).length / actionItems.length) * 100}%`, background: actionItems.every(i => i.is_done) ? '#22d3a5' : '#6c63ff', borderRadius: '99px', transition: 'width 0.4s ease' }} />
+        </div>
+        <div className="db-action-items db-section-scroll">
           {actionItems.map(item => (
-            <div
-              key={item.id}
-              className={`db-action-item ${item.is_done ? 'done' : ''}`}
-              onClick={() => toggleActionItem(item.id, item.is_done)}
-            >
+            <div key={item.id} className={`db-action-item ${item.is_done ? 'done' : ''}`} onClick={() => toggleActionItem(item.id, item.is_done)}>
               <div className={`db-checkbox ${item.is_done ? 'checked' : ''}`}>
-                {item.is_done && (
-                  <svg fill="none" viewBox="0 0 24 24" stroke="#fff" strokeWidth={2.5} width={12} height={12}>
-                    <path d="M5 13l4 4L19 7"/>
-                  </svg>
-                )}
+                {item.is_done && <svg fill="none" viewBox="0 0 24 24" stroke="#fff" strokeWidth={2.5} width={12} height={12}><path d="M5 13l4 4L19 7"/></svg>}
               </div>
               <span className="db-action-task">{item.task}</span>
               {item.owner && <span className="db-action-owner">{item.owner}</span>}
@@ -158,16 +150,15 @@ export default function MeetingDetailPage() {
         </div>
       </div>
     )}
+    {meeting.raw_notes && (
+      <div className="db-section" style={{ flex: 1 }}>
+        <div className="db-section-label db-label-gray">Raw notes</div>
+        <div className="db-section-scroll">
+          <div className="db-raw-notes">{meeting.raw_notes}</div>
+        </div>
+      </div>
+    )}
   </div>
-
-  {/* Right column — raw notes */}
-  {meeting.raw_notes && (
-    <div className="db-section" style={{ height: '100%', overflowY: 'auto' }}>
-      <div className="db-section-label db-label-gray">Raw notes</div>
-      <div className="db-raw-notes">{meeting.raw_notes}</div>
-    </div>
-  )}
-
 </div>
           </>
         )}

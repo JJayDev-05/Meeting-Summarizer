@@ -67,35 +67,39 @@ export default function NewMeetingPage() {
     <>
        <style>{`
         .db-title-row { margin-bottom: 24px; }
-        .db-form-body { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: flex-start; }
+        .db-form-body { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; flex: 1; min-height: 0; }
         .db-col-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
         .db-col-title { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 600; color: #f0f2ff; }
         .db-col-sub { font-size: 12px; font-weight: 300; color: rgba(255,255,255,0.3); }
-        .db-form-left { display: flex; flex-direction: column; gap: 14px; }
+        .db-form-left { display: flex; flex-direction: column; gap: 14px; min-height: 0; }
+        .db-form-right { display: flex; flex-direction: column; gap: 14px; min-height: 0; }
         .db-date-row { display: flex; flex-direction: column; gap: 7px; }
-        .db-textarea { padding: 14px; background: #141830; border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; color: #f0f2ff; font-size: 15px; line-height: 1.7; font-family: 'DM Sans', sans-serif; outline: none; transition: border-color 0.2s; resize: none; height: 650px; overflow-y: auto; }
+        .db-textarea { padding: 14px; background: #141830; border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; color: #f0f2ff; font-size: 15px; line-height: 1.7; font-family: 'DM Sans', sans-serif; outline: none; transition: border-color 0.2s; resize: none; flex: 1; overflow-y: auto; min-height: 0; }
         .db-textarea:focus { border-color: rgba(108,99,255,0.5); }
         .db-textarea::placeholder { color: rgba(255,255,255,0.2); }
-        .db-form-right { display: flex; flex-direction: column; gap: 14px; }
-        .db-right-empty { background: #141830; border: 1px dashed rgba(255,255,255,0.08); border-radius: 14px; padding: 40px 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 10px; min-height: 738px; }
+        .db-right-empty { background: #141830; border: 1px dashed rgba(255,255,255,0.08); border-radius: 14px; padding: 40px 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 10px; flex: 1; }
         .db-right-empty-icon { font-size: 28px; opacity: 0.2; }
         .db-right-empty-text { font-size: 13px; color: rgba(255,255,255,0.2); line-height: 1.6; }
-        .db-right-loading { background: #141830; border: 1px solid rgba(108,99,255,0.15); border-radius: 14px; padding: 40px 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 14px; min-height: 738px; }
+        .db-right-loading { background: #141830; border: 1px solid rgba(108,99,255,0.15); border-radius: 14px; padding: 40px 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 14px; flex: 1; }
         .db-right-loading-text { font-size: 14px; color: rgba(255,255,255,0.4); }
-        .db-ai-output { background: #141830; border: 1px solid rgba(108,99,255,0.25); border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 20px; animation: fadeIn 0.4s ease; height: 738px; overflow-y: auto; }
+        .db-ai-output { background: #141830; border: 1px solid rgba(108,99,255,0.25); border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 20px; animation: fadeIn 0.4s ease; flex: 1; overflow-y: auto; }
         .db-ai-section-label { font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
         .db-action-check { width: 16px; height: 16px; border-radius: 4px; border: 1px solid rgba(108,99,255,0.4); flex-shrink: 0; }
       `}</style>
 
       {toast && <Toast message={toast.message} type={toast.type} onClose={hideToast} />}
-      <main className="db-main">
+      <main className="db-main" style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
         <div className="db-page-title">New meeting</div>
         <div className="db-page-sub">Paste your notes and let AI do the heavy lifting.</div>
 
-        <div className="db-title-row">
+        <div className="db-title-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
           <div className="db-field">
             <label className="db-label">Meeting title</label>
             <input className="db-input" type="text" placeholder="e.g. Q3 Planning Session" value={title} onChange={e => setTitle(e.target.value)} />
+          </div>
+          <div className="db-field">
+            <label className="db-label">Date</label>
+            <input className="db-input" type="date" value={date} onChange={e => setDate(e.target.value)} />
           </div>
         </div>
 
@@ -105,23 +109,20 @@ export default function NewMeetingPage() {
               <span className="db-col-title">Your meeting notes</span>
               <span className="db-col-sub">Paste raw notes below</span>
             </div>
-            <div className="db-date-row">
-              <div className="db-field">
-                <label className="db-label">Date</label>
-                <input className="db-input" type="date" value={date} onChange={e => setDate(e.target.value)} />
+            <div style={{ flex: 1, position: 'relative', minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+              <textarea
+                className="db-textarea"
+                placeholder={"Paste your messy notes here...\n\ne.g.\nok so we talked abt Q3 budget\njohn said marketing gets 40k\nsarah will handle the rebrand\nneed to ship v2 by aug 15"}
+                value={notes}
+                onChange={e => setNotes(e.target.value)}
+                style={{ paddingBottom: '56px' }}
+              />
+              <div style={{ position: 'absolute', bottom: '12px', left: '12px', display: 'flex', gap: '10px' }}>
+                <button className="db-btn-ai" onClick={handleSummarize} disabled={loading}>
+                  {loading ? <><div className="db-spinner" /> Summarizing...</> : <>✦ Summarize with AI</>}
+                </button>
+                {aiDone && <button className="db-btn-save" onClick={handleSave}>Save meeting</button>}
               </div>
-            </div>
-            <textarea
-              className="db-textarea"
-              placeholder={"Paste your messy notes here...\n\ne.g.\nok so we talked abt Q3 budget\njohn said marketing gets 40k\nsarah will handle the rebrand\nneed to ship v2 by aug 15"}
-              value={notes}
-              onChange={e => setNotes(e.target.value)}
-            />
-            <div className="db-btn-row">
-              <button className="db-btn-ai" onClick={handleSummarize} disabled={loading}>
-                {loading ? <><div className="db-spinner" /> Summarizing...</> : <>✦ Summarize with AI</>}
-              </button>
-              {aiDone && <button className="db-btn-save" onClick={handleSave}>Save meeting</button>}
             </div>
           </div>
 

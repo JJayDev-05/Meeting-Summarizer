@@ -10,10 +10,10 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
-  async function handleLogin() {
+ async function handleLogin() {
     setLoading(true)
     const { error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) { alert(error.message); setLoading(false); return }
+    if (error) { setLoading(false); alert(error.message); return }
     router.push('/meetings/new')
   }
 
@@ -119,10 +119,10 @@ export default function LoginPage() {
       `}</style>
 
       <div className="auth-bg">
-        <div className="auth-logo">
+        <Link href="/" className="auth-logo">
           <div className="auth-logo-icon">✦</div>
-            <span className="auth-logo-text">MeetScribe</span>
-          </div>
+          <span className="auth-logo-text">MeetScribe</span>
+        </Link>
 
         <div className="auth-card">
           <div className="auth-title">Welcome back</div>

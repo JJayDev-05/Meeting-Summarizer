@@ -120,10 +120,10 @@ export default function SignupPage() {
       `}</style>
 
       <div className="auth-bg">
-        <div className="auth-logo">
+        <Link href="/" className="auth-logo">
           <div className="auth-logo-icon">✦</div>
-            <span className="auth-logo-text">MeetScribe</span>
-        </div>
+          <span className="auth-logo-text">MeetScribe</span>
+        </Link>
 
         <div className="auth-card">
           <div className="auth-title">Create your account</div>

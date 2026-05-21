@@ -149,9 +149,10 @@ body { background: #090d1e; font-family: var(--font-dm-sans), 'DM Sans', sans-se
 .db-input::placeholder { color: rgba(255,255,255,0.2); }
 
 /* Sections */
-.db-section { background: #141830; border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 24px; height: 380px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.1) transparent; }
-.db-section::-webkit-scrollbar { width: 4px; }
-.db-section::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+.db-section { background: #141830; border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 24px; overflow: hidden; display: flex; flex-direction: column; }
+.db-section-scroll { overflow-y: auto; flex: 1; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.1) transparent; }
+.db-section-scroll::-webkit-scrollbar { width: 4px; }
+.db-section-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
 .db-section-label { font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 14px; }
 .db-label-blue { color: #6c63ff; }
 .db-label-green { color: #22d3a5; }
