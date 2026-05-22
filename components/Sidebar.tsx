@@ -236,11 +236,15 @@ export default function Sidebar({ collapsed, onToggle, sidebarW }: SidebarProps)
         {/* Top row */}
         <div className="db-sidebar-top">
           <div className="db-logo">
-            <div className="db-logo-icon">✦</div>
-            <span className="db-logo-text" style={{ opacity: collapsed ? 0 : 1 }}>
-              MeetScribe
-            </span>
-          </div>
+  <img
+    src="/logo.png"
+    alt="MeetScribe"
+    style={{ width: 32, height: 32, borderRadius: 10, objectFit: 'contain', flexShrink: 0 }}
+  />
+  <span className="db-logo-text" style={{ opacity: collapsed ? 0 : 1 }}>
+    MeetScribe
+  </span>
+</div>
           {!collapsed && (
             <button className="db-toggle-btn" onClick={onToggle} title="Collapse sidebar">
               <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} width={18} height={18}>

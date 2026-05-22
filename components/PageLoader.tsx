@@ -39,7 +39,7 @@ export default function PageLoader({ text = 'Loading...' }: PageLoaderProps) {
       `}</style>
 
       <div className="page-loader">
-        <div className="page-loader-icon">✦</div>
+        <img src="/logo.png" alt="MeetScribe" style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'contain' }} />
         <div className="page-loader-spinner" />
         <div className="page-loader-text">{text}</div>
       </div>

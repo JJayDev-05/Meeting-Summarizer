@@ -7,10 +7,12 @@ import Link from 'next/link'
 export default function SignupPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
   async function handleSignup() {
+    if (password !== confirmPassword) { alert('Passwords do not match'); return }
     setLoading(true)
     const { error } = await supabase.auth.signUp({ email, password })
     if (error) { alert(error.message); setLoading(false); return }
@@ -121,7 +123,7 @@ export default function SignupPage() {
 
       <div className="auth-bg">
         <Link href="/" className="auth-logo">
-          <div className="auth-logo-icon">✦</div>
+          <img src="/logo.png" alt="MeetScribe" style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'contain' }} />
           <span className="auth-logo-text">MeetScribe</span>
         </Link>
 
@@ -145,6 +147,15 @@ export default function SignupPage() {
             placeholder="••••••••"
             value={password}
             onChange={e => setPassword(e.target.value)}
+          />
+          
+          <label className="auth-label">Confirm password</label>
+          <input
+            className="auth-input"
+            type="password"
+            placeholder="••••••••"
+            value={confirmPassword}
+            onChange={e => setConfirmPassword(e.target.value)}
           />
 
           <button className="auth-btn" onClick={handleSignup} disabled={loading}>

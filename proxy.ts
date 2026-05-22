@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const response = NextResponse.next()
 
   const supabase = createServerClient(
@@ -18,12 +18,18 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { session } } = await supabase.auth.getSession()
+  const user = session?.user
 
-  const isProtected = request.nextUrl.pathname.startsWith('/meetings')
+  const isProtectedPage = request.nextUrl.pathname.startsWith('/meetings')
+  const isProtectedApi = request.nextUrl.pathname.startsWith('/api')
 
-  if (!user && isProtected) {
+  if (!user && isProtectedPage) {
     return NextResponse.redirect(new URL('/login', request.url))
+  }
+
+  if (!user && isProtectedApi) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
   if (user && (request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/signup')) {
@@ -34,5 +40,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/meetings/:path*', '/login', '/signup'],
+  matcher: ['/meetings/:path*', '/login', '/signup', '/api/:path*'],
 }

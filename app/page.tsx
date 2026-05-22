@@ -2,16 +2,14 @@ import Link from "next/link";
 
 export default function Home() {
   const features = [
-    { icon: '✦', title: 'Instant summaries', desc: 'Drop in any rambling notes — get a tight 3–5 sentence recap that captures what actually matters.' },
+    { icon: '✦', title: 'Instant summaries', desc: 'Drop in any rambling notes, get a tight 3–5 sentence recap that captures what actually matters.' },
     { icon: '≡', title: 'Decisions captured', desc: 'Never lose what was actually agreed in the room. Every decision is extracted and listed clearly.' },
-    { icon: '⊙', title: 'Action items + owners', desc: 'Tasks parsed with the right person attached, ready to ship — no more "wait, who was doing that?"' },
+    { icon: '⊙', title: 'Action items + owners', desc: 'Tasks parsed with the right person attached, ready to ship no more "wait, who was doing that?"' },
   ];
 
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
-
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background: #0a0e1f; }
 
@@ -96,7 +94,7 @@ export default function Home() {
         }
 
         .ms-hero h1 {
-          font-family: 'Space Grotesk', sans-serif;
+          font-family: var(--font-syne), 'Syne', sans-serif;
           font-size: clamp(48px, 8vw, 108px);
           font-weight: 800;
           line-height: 1.0;
@@ -207,7 +205,7 @@ export default function Home() {
         {/* Nav */}
         <nav className="ms-nav">
           <Link href="/" className="ms-logo">
-            <div className="ms-logo-icon">✦</div>
+            <img src="/logo.png" alt="MeetScribe" style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'contain' }} />
             MeetScribe
           </Link>
           <div className="ms-nav-right">
@@ -249,7 +247,7 @@ export default function Home() {
         {/* Footer */}
         <footer className="ms-footer">
           <span>✦ MeetScribe</span>
-          <span>Built with Next.js · Supabase · Claude AI</span>
+          <span>Built with Next.js · Supabase</span>
         </footer>
 
       </div>

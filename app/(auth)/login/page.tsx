@@ -120,7 +120,7 @@ export default function LoginPage() {
 
       <div className="auth-bg">
         <Link href="/" className="auth-logo">
-          <div className="auth-logo-icon">✦</div>
+          <img src="/logo.png" alt="MeetScribe" style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'contain' }} />
           <span className="auth-logo-text">MeetScribe</span>
         </Link>
 
@@ -150,8 +150,9 @@ export default function LoginPage() {
             {loading ? 'Signing in...' : 'Sign in'}
           </button>
 
-          <div className="auth-footer">
-            No account? <Link href="/signup">Create one</Link>
+          <div className="auth-footer" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <a href="/forgot-password" style={{ color: '#a78bfa', textDecoration: 'none', fontSize: '14px' }}>Forgot password?</a>
+            <span>No account? <Link href="/signup">Create one</Link></span>
           </div>
         </div>
       </div>
