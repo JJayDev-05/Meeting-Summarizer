@@ -58,7 +58,9 @@ export default function NewMeetingPage() {
       if (!res.ok) throw new Error('Failed to save')
       showToast('Meeting saved!', 'success')
       window.dispatchEvent(new Event('meeting-saved'))
-      router.push('/meetings/new')
+      setTimeout(() => {
+        router.push('/meetings/new')
+      }, 300)
     } catch {
       showToast('Something went wrong saving the meeting.', 'error')
     }
