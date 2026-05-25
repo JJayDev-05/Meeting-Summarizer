@@ -30,17 +30,23 @@ export default function Sidebar({ collapsed, onToggle, sidebarW }: SidebarProps)
 
   const iconSize = collapsed ? 24 : 18
 
+  function fetchMeetings() {
+    fetch('/api/meetings')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setMeetings(data)
+          setInitialized(true)
+        }
+      })
+      .catch(() => {})
+  }
+
   useEffect(() => {
-  fetch('/api/meetings')
-    .then(res => res.json())
-    .then(data => {
-      if (Array.isArray(data)) {
-        setMeetings(data)
-        setInitialized(true)
-      }
-    })
-    .catch(() => {})
-}, [])
+    fetchMeetings()
+    window.addEventListener('meeting-saved', fetchMeetings)
+    return () => window.removeEventListener('meeting-saved', fetchMeetings)
+  }, [])
 
   useEffect(() => {
     function handleClickOutside() { setMenuOpen(null) }
