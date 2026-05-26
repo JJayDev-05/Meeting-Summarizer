@@ -56,10 +56,11 @@ export default function NewMeetingPage() {
         }),
       })
       if (!res.ok) throw new Error('Failed to save')
+      const savedMeeting = await res.json()
       showToast('Meeting saved!', 'success')
       window.dispatchEvent(new Event('meeting-saved'))
       setTimeout(() => {
-        router.push('/meetings/new')
+        router.push(`/meetings/${savedMeeting.id}`)
       }, 300)
     } catch {
       showToast('Something went wrong saving the meeting.', 'error')
