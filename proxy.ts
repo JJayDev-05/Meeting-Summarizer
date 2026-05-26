@@ -18,22 +18,13 @@ export async function proxy(request: NextRequest) {
     }
   )
 
-  const { data: { session } } = await supabase.auth.getSession()
-  const user = session?.user
-
   const isProtectedPage = request.nextUrl.pathname.startsWith('/meetings')
-  const isProtectedApi = request.nextUrl.pathname.startsWith('/api')
 
-  if (!user && isProtectedPage) {
-    return NextResponse.redirect(new URL('/login', request.url))
-  }
-
-  if (!user && isProtectedApi) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
-  if (user && (request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/signup')) {
-    return NextResponse.redirect(new URL('/meetings/new', request.url))
+  if (isProtectedPage) {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) {
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
   }
 
   return response

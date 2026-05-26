@@ -31,6 +31,7 @@ export default function MeetingDetailPage() {
   const { toast, showToast, hideToast } = useToast()
   const [meeting, setMeeting] = useState<Meeting | null>(null)
   const [loading, setLoading] = useState(true)
+  const [prevMeeting, setPrevMeeting] = useState<Meeting | null>(null)
   const [notFound, setNotFound] = useState(false)
   const [actionItems, setActionItems] = useState<ActionItem[]>([])
   const prevId = useRef<string | null>(null)
@@ -39,6 +40,7 @@ export default function MeetingDetailPage() {
     if (!id) return
     if (prevId.current !== id) {
       setLoading(true)
+      setPrevMeeting(meeting)
       setMeeting(null)
       prevId.current = id as string
     }
@@ -77,7 +79,12 @@ export default function MeetingDetailPage() {
 
       {toast && <Toast message={toast.message} type={toast.type} onClose={hideToast} />}
       <main className="db-main">
-        {loading && <PageLoader text="Loading meeting..." />}
+        {loading && !prevMeeting && <PageLoader text="Loading meeting..." />}
+        {loading && prevMeeting && (
+          <div style={{ opacity: 0.4, pointerEvents: 'none' }}>
+            {/* show previous meeting faded while loading */}
+          </div>
+        )}
         {notFound && !loading && (
           <div className="db-not-found">
             <div className="db-not-found-title">Meeting not found</div>
