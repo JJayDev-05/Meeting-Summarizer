@@ -3,11 +3,14 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Toast from '@/components/Toast'
 import { useToast } from '@/hooks/useToast'
+import { useMeetings } from '@/lib/meetings-context'
 
 
 export default function NewMeetingPage() {
   const router = useRouter()
   const { toast, showToast, hideToast } = useToast()
+  const { meetings, initialized } = useMeetings()
+  const isFirstTime = initialized && meetings.length === 0
 
   const [title, setTitle] = useState('')
   const [date, setDate] = useState('')
@@ -95,6 +98,16 @@ export default function NewMeetingPage() {
       <main className="db-main" style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
         <div className="db-page-title">New meeting</div>
         <div className="db-page-sub">Paste your notes and let AI do the heavy lifting.</div>
+
+        {isFirstTime && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', background: 'rgba(108,99,255,0.1)', border: '1px solid rgba(108,99,255,0.2)', borderRadius: 12, marginBottom: 4 }}>
+            <span style={{ fontSize: 20 }}>👋</span>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: '#f0f2ff' }}>Welcome! Create your first meeting.</div>
+              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>Fill in a title, paste your raw notes, and hit <strong style={{ color: '#a78bfa' }}>Summarize with AI</strong> to get started.</div>
+            </div>
+          </div>
+        )}
 
         <div className="db-title-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
           <div className="db-field">

@@ -43,21 +43,47 @@ export async function GET(
   return NextResponse.json(data)
 }
 
-// PATCH /api/meetings/[id] — rename
+// PATCH /api/meetings/[id] — rename or re-summarize
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
   const supabase = await createClient()
-  const { title } = await request.json()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { error } = await supabase
-    .from('meetings')
-    .update({ title })
-    .eq('id', id)
+  const body = await request.json()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  // Build the meetings update from whichever fields are present
+  const meetingUpdate: Record<string, unknown> = {}
+  if (body.title !== undefined) meetingUpdate.title = body.title
+  if (body.meeting_date !== undefined) meetingUpdate.meeting_date = body.meeting_date
+  if (body.raw_notes !== undefined) meetingUpdate.raw_notes = body.raw_notes
+  if (body.ai_summary !== undefined) meetingUpdate.ai_summary = body.ai_summary
+  if (body.ai_decisions !== undefined) meetingUpdate.ai_decisions = body.ai_decisions
+
+  if (Object.keys(meetingUpdate).length > 0) {
+    const { error } = await supabase.from('meetings').update(meetingUpdate).eq('id', id)
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+
+  // Replace action items if provided
+  if (Array.isArray(body.action_items)) {
+    await supabase.from('action_items').delete().eq('meeting_id', id)
+    if (body.action_items.length > 0) {
+      const { error } = await supabase.from('action_items').insert(
+        body.action_items.map((item: { task: string; owner: string }) => ({
+          meeting_id: id,
+          task: item.task,
+          owner: item.owner || null,
+          is_done: false,
+        }))
+      )
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+  }
+
   return NextResponse.json({ success: true })
 }
 

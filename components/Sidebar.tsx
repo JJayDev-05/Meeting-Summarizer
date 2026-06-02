@@ -10,10 +10,13 @@ interface SidebarProps {
   collapsed: boolean
   onToggle: () => void
   sidebarW: number
+  isMobile?: boolean
+  mobileOpen?: boolean
+  onMobileClose?: () => void
 }
 
 
-export default function Sidebar({ collapsed, onToggle, sidebarW }: SidebarProps) {
+export default function Sidebar({ collapsed, onToggle, sidebarW, isMobile = false, mobileOpen = false, onMobileClose }: SidebarProps) {
   const router = useRouter()
   const pathname = usePathname()
   const { meetings, initialized, updateMeeting, removeMeeting } = useMeetings()
@@ -22,6 +25,7 @@ export default function Sidebar({ collapsed, onToggle, sidebarW }: SidebarProps)
   const [renaming, setRenaming] = useState<string | null>(null)
   const [renameValue, setRenameValue] = useState('')
   const [clickedId, setClickedId] = useState<string | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null)
 
   const iconSize = collapsed ? 24 : 18
 
@@ -36,11 +40,13 @@ export default function Sidebar({ collapsed, onToggle, sidebarW }: SidebarProps)
     router.push('/login')
   }
 
-  async function handleDelete(meetingId: string) {
-    setMenuOpen(null)
-    await fetch(`/api/meetings/${meetingId}`, { method: 'DELETE' })
-    removeMeeting(meetingId)
-    if (pathname === `/meetings/${meetingId}`) router.push('/meetings/new')
+  async function handleDelete() {
+    if (!deleteTarget) return
+    const { id } = deleteTarget
+    setDeleteTarget(null)
+    await fetch(`/api/meetings/${id}`, { method: 'DELETE' })
+    removeMeeting(id)
+    if (pathname === `/meetings/${id}`) router.push('/meetings/new')
   }
 
   async function handleRename(meetingId: string) {
@@ -227,13 +233,79 @@ export default function Sidebar({ collapsed, onToggle, sidebarW }: SidebarProps)
           margin-top: 8px;
         }
         .db-signout:hover { color: #f0f2ff; background: rgba(255,255,255,0.04); }
+
+        .db-confirm-overlay {
+          position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+          backdrop-filter: blur(4px); z-index: 500;
+          display: flex; align-items: center; justify-content: center; padding: 24px;
+        }
+        .db-confirm-modal {
+          background: #141830; border: 1px solid rgba(255,255,255,0.1);
+          border-radius: 16px; padding: 28px 28px 24px;
+          width: 100%; max-width: 360px;
+          box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+        .db-confirm-icon {
+          width: 40px; height: 40px; border-radius: 50%;
+          background: rgba(255,80,80,0.12);
+          display: flex; align-items: center; justify-content: center;
+          margin-bottom: 14px;
+        }
+        .db-confirm-title {
+          font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700;
+          color: #f0f2ff; margin-bottom: 8px;
+        }
+        .db-confirm-msg {
+          font-size: 14px; color: #8892b0; line-height: 1.55; margin-bottom: 22px;
+        }
+        .db-confirm-msg strong { color: #f0f2ff; }
+        .db-confirm-actions { display: flex; gap: 10px; }
+        .db-confirm-cancel {
+          flex: 1; padding: 11px; background: rgba(255,255,255,0.06);
+          color: #f0f2ff; border: none; border-radius: 10px;
+          font-size: 14px; font-weight: 500; font-family: 'DM Sans', sans-serif;
+          cursor: pointer; transition: background 0.2s;
+        }
+        .db-confirm-cancel:hover { background: rgba(255,255,255,0.1); }
+        .db-confirm-delete {
+          flex: 1; padding: 11px; background: #ef4444;
+          color: #fff; border: none; border-radius: 10px;
+          font-size: 14px; font-weight: 500; font-family: 'DM Sans', sans-serif;
+          cursor: pointer; transition: background 0.2s;
+        }
+        .db-confirm-delete:hover { background: #dc2626; }
       `}</style>
-      
-       <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
+
+      <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
+
+      {deleteTarget && (
+        <div className="db-confirm-overlay" onClick={() => setDeleteTarget(null)}>
+          <div className="db-confirm-modal" onClick={e => e.stopPropagation()}>
+            <div className="db-confirm-icon">
+              <svg fill="none" viewBox="0 0 24 24" stroke="#ef4444" strokeWidth={2} width={20} height={20}>
+                <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>
+              </svg>
+            </div>
+            <div className="db-confirm-title">Delete meeting?</div>
+            <div className="db-confirm-msg">
+              <strong>{deleteTarget.title}</strong> will be permanently deleted. This cannot be undone.
+            </div>
+            <div className="db-confirm-actions">
+              <button className="db-confirm-cancel" onClick={() => setDeleteTarget(null)}>Cancel</button>
+              <button className="db-confirm-delete" onClick={handleDelete}>Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <aside
         className={`db-sidebar ${collapsed ? 'collapsed' : ''}`}
-        style={{ width: sidebarW }}
+        style={{
+          width: sidebarW,
+          transform: isMobile ? (mobileOpen ? 'translateX(0)' : 'translateX(-100%)') : 'none',
+          transition: isMobile ? 'transform 0.25s ease' : 'width 0.25s ease',
+          zIndex: isMobile ? 60 : 50,
+        }}
         onClick={collapsed ? onToggle : undefined}
       >
 
@@ -315,7 +387,7 @@ export default function Sidebar({ collapsed, onToggle, sidebarW }: SidebarProps)
               href={`/meetings/${meeting.id}`}
               className={`db-recent-item ${pathname === `/meetings/${meeting.id}` ? 'active' : ''}`}
               title={meeting.title}
-              onClick={() => { setMenuOpen(null); setClickedId(meeting.id) }}
+              onClick={() => { setMenuOpen(null); setClickedId(meeting.id); onMobileClose?.() }}
             >
               <span className="db-recent-dot" style={{ opacity: collapsed ? 0 : 1 }} />
               {(() => {
@@ -353,7 +425,7 @@ export default function Sidebar({ collapsed, onToggle, sidebarW }: SidebarProps)
                 <button className="db-recent-dropdown-item" onClick={() => { setRenaming(meeting.id); setRenameValue(meeting.title); setMenuOpen(null) }}>
                   ✏️ Rename
                 </button>
-                <button className="db-recent-dropdown-item danger" onClick={() => handleDelete(meeting.id)}>
+                <button className="db-recent-dropdown-item danger" onClick={() => { setMenuOpen(null); setDeleteTarget({ id: meeting.id, title: meeting.title }) }}>
                   🗑️ Delete
                 </button>
               </div>
