@@ -9,16 +9,17 @@ export default function SignupPage() {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState(false)
   const router = useRouter()
 
   async function handleSignup() {
-    if (!email || !password || !confirmPassword) { alert('Please fill in all fields.'); return }
-    if (password !== confirmPassword) { alert('Passwords do not match'); return }
+    if (!email || !password || !confirmPassword) { setError('Please fill in all fields.'); return }
+    if (password !== confirmPassword) { setError('Passwords do not match.'); return }
     setLoading(true)
     const { error } = await supabase.auth.signUp({ email, password })
-    if (error) { alert(error.message); setLoading(false); return }
-    alert('Check your email to confirm your account!')
-    router.push('/login')
+    if (error) { setError(error.message); setLoading(false); return }
+    setSuccess(true)
   }
 
   return (
@@ -42,12 +43,6 @@ export default function SignupPage() {
           display: flex; align-items: center; gap: 10px;
           margin-bottom: 32px;
           text-decoration: none;
-        }
-        .auth-logo-icon {
-          width: 36px; height: 36px; border-radius: 50%;
-          background: linear-gradient(135deg, #6c63ff, #a78bfa);
-          display: flex; align-items: center; justify-content: center;
-          font-size: 16px; color: #fff;
         }
         .auth-logo-text {
           font-family: 'Syne', sans-serif;
@@ -120,7 +115,79 @@ export default function SignupPage() {
         }
         .auth-footer a { color: #a78bfa; text-decoration: none; }
         .auth-footer a:hover { text-decoration: underline; }
+
+        .auth-modal-overlay {
+          position: fixed; inset: 0;
+          background: rgba(0,0,0,0.55);
+          backdrop-filter: blur(4px);
+          z-index: 500;
+          display: flex; align-items: center; justify-content: center;
+          padding: 24px;
+        }
+        .auth-modal {
+          background: #141830;
+          border-radius: 16px;
+          padding: 28px 28px 24px;
+          width: 100%; max-width: 360px;
+          box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+        .auth-modal-icon {
+          width: 40px; height: 40px; border-radius: 50%;
+          display: flex; align-items: center; justify-content: center;
+          margin-bottom: 14px;
+        }
+        .auth-modal-title {
+          font-family: 'Syne', sans-serif;
+          font-size: 16px; font-weight: 700;
+          color: #f0f2ff;
+          margin-bottom: 8px;
+        }
+        .auth-modal-msg {
+          font-size: 14px; color: #8892b0;
+          line-height: 1.55;
+          margin-bottom: 22px;
+        }
+        .auth-modal-btn {
+          width: 100%; padding: 11px;
+          border: none; border-radius: 10px;
+          font-size: 14px; font-weight: 500;
+          font-family: 'DM Sans', sans-serif;
+          cursor: pointer;
+          transition: background 0.2s;
+        }
       `}</style>
+
+      {/* Error modal */}
+      {error && (
+        <div className="auth-modal-overlay" onClick={() => setError('')}>
+          <div className="auth-modal" style={{ border: '1px solid rgba(248,113,113,0.25)' }} onClick={e => e.stopPropagation()}>
+            <div className="auth-modal-icon" style={{ background: 'rgba(248,113,113,0.12)' }}>
+              <svg fill="none" viewBox="0 0 24 24" stroke="#f87171" strokeWidth={2} width={20} height={20}>
+                <path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+              </svg>
+            </div>
+            <div className="auth-modal-title">Something went wrong</div>
+            <div className="auth-modal-msg">{error}</div>
+            <button className="auth-modal-btn" style={{ background: '#6c63ff', color: '#fff' }} onClick={() => setError('')}>OK</button>
+          </div>
+        </div>
+      )}
+
+      {/* Success modal */}
+      {success && (
+        <div className="auth-modal-overlay">
+          <div className="auth-modal" style={{ border: '1px solid rgba(34,211,165,0.25)' }}>
+            <div className="auth-modal-icon" style={{ background: 'rgba(34,211,165,0.12)' }}>
+              <svg fill="none" viewBox="0 0 24 24" stroke="#22d3a5" strokeWidth={2} width={20} height={20}>
+                <path d="M5 13l4 4L19 7"/>
+              </svg>
+            </div>
+            <div className="auth-modal-title">Check your email</div>
+            <div className="auth-modal-msg">We sent a confirmation link to <strong style={{ color: '#f0f2ff' }}>{email}</strong>. Click it to activate your account.</div>
+            <button className="auth-modal-btn" style={{ background: '#22d3a5', color: '#0a1628' }} onClick={() => router.push('/login')}>Go to sign in</button>
+          </div>
+        </div>
+      )}
 
       <div className="auth-bg">
         <Link href="/" className="auth-logo">

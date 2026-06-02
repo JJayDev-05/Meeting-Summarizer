@@ -8,13 +8,14 @@ export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
   const router = useRouter()
 
   async function handleLogin() {
-    if (!email || !password) { alert('Please enter your email and password.'); return }
+    if (!email || !password) { setError('Please enter your email and password.'); return }
     setLoading(true)
     const { error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) { setLoading(false); alert(error.message); return }
+    if (error) { setLoading(false); setError(error.message); return }
     router.push('/meetings/new')
   }
 
@@ -39,12 +40,6 @@ export default function LoginPage() {
           display: flex; align-items: center; gap: 10px;
           margin-bottom: 32px;
           text-decoration: none;
-        }
-        .auth-logo-icon {
-          width: 36px; height: 36px; border-radius: 50%;
-          background: linear-gradient(135deg, #6c63ff, #a78bfa);
-          display: flex; align-items: center; justify-content: center;
-          font-size: 16px; color: #fff;
         }
         .auth-logo-text {
           font-family: 'Syne', sans-serif;
@@ -117,7 +112,66 @@ export default function LoginPage() {
         }
         .auth-footer a { color: #a78bfa; text-decoration: none; }
         .auth-footer a:hover { text-decoration: underline; }
+
+        .auth-error-overlay {
+          position: fixed; inset: 0;
+          background: rgba(0,0,0,0.55);
+          backdrop-filter: blur(4px);
+          z-index: 500;
+          display: flex; align-items: center; justify-content: center;
+          padding: 24px;
+        }
+        .auth-error-modal {
+          background: #141830;
+          border: 1px solid rgba(248,113,113,0.25);
+          border-radius: 16px;
+          padding: 28px 28px 24px;
+          width: 100%; max-width: 360px;
+          box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+        .auth-error-icon {
+          width: 40px; height: 40px; border-radius: 50%;
+          background: rgba(248,113,113,0.12);
+          display: flex; align-items: center; justify-content: center;
+          margin-bottom: 14px;
+        }
+        .auth-error-title {
+          font-family: 'Syne', sans-serif;
+          font-size: 16px; font-weight: 700;
+          color: #f0f2ff;
+          margin-bottom: 8px;
+        }
+        .auth-error-msg {
+          font-size: 14px; color: #8892b0;
+          line-height: 1.55;
+          margin-bottom: 22px;
+        }
+        .auth-error-btn {
+          width: 100%; padding: 11px;
+          background: #6c63ff; color: #fff;
+          border: none; border-radius: 10px;
+          font-size: 14px; font-weight: 500;
+          font-family: 'DM Sans', sans-serif;
+          cursor: pointer;
+          transition: background 0.2s;
+        }
+        .auth-error-btn:hover { background: #5a52e8; }
       `}</style>
+
+      {error && (
+        <div className="auth-error-overlay" onClick={() => setError('')}>
+          <div className="auth-error-modal" onClick={e => e.stopPropagation()}>
+            <div className="auth-error-icon">
+              <svg fill="none" viewBox="0 0 24 24" stroke="#f87171" strokeWidth={2} width={20} height={20}>
+                <path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+              </svg>
+            </div>
+            <div className="auth-error-title">Sign in failed</div>
+            <div className="auth-error-msg">{error}</div>
+            <button className="auth-error-btn" onClick={() => setError('')}>OK</button>
+          </div>
+        </div>
+      )}
 
       <div className="auth-bg">
         <Link href="/" className="auth-logo">
