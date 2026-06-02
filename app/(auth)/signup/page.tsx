@@ -12,6 +12,7 @@ export default function SignupPage() {
   const router = useRouter()
 
   async function handleSignup() {
+    if (!email || !password || !confirmPassword) { alert('Please fill in all fields.'); return }
     if (password !== confirmPassword) { alert('Passwords do not match'); return }
     setLoading(true)
     const { error } = await supabase.auth.signUp({ email, password })
@@ -131,36 +132,38 @@ export default function SignupPage() {
           <div className="auth-title">Create your account</div>
           <div className="auth-subtitle">Start summarizing meetings in seconds</div>
 
-          <label className="auth-label">Email</label>
-          <input
-            className="auth-input"
-            type="email"
-            placeholder="you@example.com"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-          />
+          <form onSubmit={e => { e.preventDefault(); handleSignup() }} noValidate>
+            <label className="auth-label">Email</label>
+            <input
+              className="auth-input"
+              type="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+            />
 
-          <label className="auth-label">Password</label>
-          <input
-            className="auth-input"
-            type="password"
-            placeholder="••••••••"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-          />
-          
-          <label className="auth-label">Confirm password</label>
-          <input
-            className="auth-input"
-            type="password"
-            placeholder="••••••••"
-            value={confirmPassword}
-            onChange={e => setConfirmPassword(e.target.value)}
-          />
+            <label className="auth-label">Password</label>
+            <input
+              className="auth-input"
+              type="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+            />
 
-          <button className="auth-btn" onClick={handleSignup} disabled={loading}>
-            {loading ? 'Creating account...' : 'Create account'}
-          </button>
+            <label className="auth-label">Confirm password</label>
+            <input
+              className="auth-input"
+              type="password"
+              placeholder="••••••••"
+              value={confirmPassword}
+              onChange={e => setConfirmPassword(e.target.value)}
+            />
+
+            <button className="auth-btn" type="submit" disabled={loading}>
+              {loading ? 'Creating account...' : 'Create account'}
+            </button>
+          </form>
 
           <div className="auth-footer">
             Already a member? <Link href="/login">Sign in</Link>

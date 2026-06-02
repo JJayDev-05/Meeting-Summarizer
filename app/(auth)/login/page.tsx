@@ -10,7 +10,8 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
- async function handleLogin() {
+  async function handleLogin() {
+    if (!email || !password) { alert('Please enter your email and password.'); return }
     setLoading(true)
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) { setLoading(false); alert(error.message); return }
@@ -128,27 +129,29 @@ export default function LoginPage() {
           <div className="auth-title">Welcome back</div>
           <div className="auth-subtitle">Sign in to your workspace</div>
 
-          <label className="auth-label">Email</label>
-          <input
-            className="auth-input"
-            type="email"
-            placeholder="you@example.com"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-          />
+          <form onSubmit={e => { e.preventDefault(); handleLogin() }} noValidate>
+            <label className="auth-label">Email</label>
+            <input
+              className="auth-input"
+              type="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+            />
 
-          <label className="auth-label">Password</label>
-          <input
-            className="auth-input"
-            type="password"
-            placeholder="••••••••"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-          />
+            <label className="auth-label">Password</label>
+            <input
+              className="auth-input"
+              type="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+            />
 
-          <button className="auth-btn" onClick={handleLogin} disabled={loading}>
-            {loading ? 'Signing in...' : 'Sign in'}
-          </button>
+            <button className="auth-btn" type="submit" disabled={loading}>
+              {loading ? 'Signing in...' : 'Sign in'}
+            </button>
+          </form>
 
           <div className="auth-footer" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <a href="/forgot-password" style={{ color: '#a78bfa', textDecoration: 'none', fontSize: '14px' }}>Forgot password?</a>
