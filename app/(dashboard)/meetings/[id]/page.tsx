@@ -30,7 +30,7 @@ export default function MeetingDetailPage() {
   const router = useRouter()
 
   const { toast, showToast, hideToast } = useToast()
-  const { meetings } = useMeetings()
+  const { meetings, updateMeeting } = useMeetings()
   const [meeting, setMeeting] = useState<Meeting | null>(null)
   const [loading, setLoading] = useState(true)
   const [prevMeeting, setPrevMeeting] = useState<Meeting | null>(null)
@@ -77,9 +77,9 @@ export default function MeetingDetailPage() {
   }, [id, meetings])
 
   async function toggleActionItem(itemId: string, isDone: boolean) {
-    setActionItems(prev =>
-      prev.map(item => item.id === itemId ? { ...item, is_done: !isDone } : item)
-    )
+    const updated = actionItems.map(item => item.id === itemId ? { ...item, is_done: !isDone } : item)
+    setActionItems(updated)
+    if (meeting) updateMeeting(meeting.id, { action_items: updated })
     await fetch(`/api/action-items/${itemId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
