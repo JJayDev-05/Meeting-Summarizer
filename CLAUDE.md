@@ -35,7 +35,7 @@ GROQ_API_KEY=                    # Groq LLM API key (server-side only)
 
 ### Data Layer
 
-**Supabase (PostgreSQL + Auth + RLS)**
+**Supabase (PostgreSQL + Auth + RLS)** — full schema in [`schema.sql`](schema.sql)
 
 Two tables, both with Row Level Security scoped to `auth.uid()`:
 
