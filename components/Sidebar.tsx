@@ -139,19 +139,34 @@ export default function Sidebar({ collapsed, onToggle, sidebarW }: SidebarProps)
         }
         .db-recent-row:hover .db-recent-menu-btn { opacity: 1; }
         .db-recent-item {
-          display: flex; align-items: center; gap: 8px;
+          display: flex; align-items: flex-start; gap: 8px;
           padding: 8px 8px; border-radius: 8px;
-          color: rgba(255,255,255,0.85); font-size: 15px
+          color: rgba(255,255,255,0.85); font-size: 15px;
           text-decoration: none; transition: background 0.15s, color 0.15s;
-          white-space: nowrap; overflow: hidden; min-width: 0;
+          overflow: hidden; min-width: 0;
           flex: 1;
         }
         .db-recent-item:hover { background: rgba(255,255,255,0.06); color: #f0f2ff; }
         .db-recent-item.active { color: #f0f2ff; }
         .db-recent-row:has(.db-recent-item.active) { background: rgba(108,99,255,0.15); }
         .db-sidebar.collapsed .db-recent-row:has(.db-recent-item.active) { background: transparent; }
-        .db-recent-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(108,99,255,0.6); flex-shrink: 0; }
-        .db-recent-title { overflow: hidden; text-overflow: ellipsis; flex: 1; }
+        .db-recent-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(108,99,255,0.6); flex-shrink: 0; margin-top: 5px; }
+        .db-recent-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+        .db-recent-title-row { display: flex; align-items: center; gap: 6px; min-width: 0; }
+        .db-recent-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+        .db-complete-badge {
+          font-size: 10px; font-weight: 600; letter-spacing: 0.3px;
+          color: #22d3a5; background: rgba(34,211,165,0.12);
+          border-radius: 99px; padding: 1px 6px; flex-shrink: 0; white-space: nowrap;
+        }
+        .db-meeting-progress {
+          height: 3px; background: rgba(255,255,255,0.08);
+          border-radius: 99px; overflow: hidden;
+        }
+        .db-meeting-progress-fill {
+          height: 100%; border-radius: 99px;
+          transition: width 0.4s ease, background 0.4s ease;
+        }
         .db-recent-menu-btn {
           opacity: 0; flex-shrink: 0;
           background: none; border: none; cursor: pointer;
@@ -291,10 +306,28 @@ export default function Sidebar({ collapsed, onToggle, sidebarW }: SidebarProps)
               title={meeting.title}
               onClick={() => setMenuOpen(null)}
             >
-              <span className="db-recent-dot" style={{ flexShrink: 0, opacity: collapsed ? 0 : 1 }} />
-              <span className="db-recent-title" style={{ opacity: collapsed ? 0 : 1 }}>
-                {meeting.title}
-              </span>
+              <span className="db-recent-dot" style={{ opacity: collapsed ? 0 : 1 }} />
+              {(() => {
+                const total = meeting.action_items?.length ?? 0
+                const done = meeting.action_items?.filter(i => i.is_done).length ?? 0
+                const allDone = total > 0 && done === total
+                return (
+                  <div className="db-recent-text" style={{ opacity: collapsed ? 0 : 1 }}>
+                    <div className="db-recent-title-row">
+                      <span className="db-recent-title">{meeting.title}</span>
+                      {allDone && <span className="db-complete-badge">✓ Done</span>}
+                    </div>
+                    {total > 0 && !allDone && (
+                      <div className="db-meeting-progress">
+                        <div
+                          className="db-meeting-progress-fill"
+                          style={{ width: `${(done / total) * 100}%`, background: '#6c63ff' }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                )
+              })()}
             </Link>
             {!collapsed && (
               <button

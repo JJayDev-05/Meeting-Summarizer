@@ -1,13 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-
-interface Meeting {
-  id: string
-  title: string
-  meeting_date: string | null
-  created_at: string
-}
+import { useMeetings } from '@/lib/meetings-context'
 
 interface SearchModalProps {
   open: boolean
@@ -15,16 +9,8 @@ interface SearchModalProps {
 }
 
 export default function SearchModal({ open, onClose }: SearchModalProps) {
-  const [meetings, setMeetings] = useState<Meeting[]>([])
+  const { meetings } = useMeetings()
   const [query, setQuery] = useState('')
-
-  useEffect(() => {
-    if (!open) return
-    fetch('/api/meetings')
-      .then(res => res.json())
-      .then(data => { if (Array.isArray(data)) setMeetings(data) })
-      .catch(() => {})
-  }, [open])
 
   useEffect(() => {
     if (!open) { setQuery(''); return }
