@@ -21,6 +21,7 @@ export default function Sidebar({ collapsed, onToggle, sidebarW }: SidebarProps)
   const [menuOpen, setMenuOpen] = useState<string | null>(null)
   const [renaming, setRenaming] = useState<string | null>(null)
   const [renameValue, setRenameValue] = useState('')
+  const [clickedId, setClickedId] = useState<string | null>(null)
 
   const iconSize = collapsed ? 24 : 18
 
@@ -133,10 +134,16 @@ export default function Sidebar({ collapsed, onToggle, sidebarW }: SidebarProps)
         .db-recents-list::-webkit-scrollbar { width: 4px; }
         .db-recents-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
 
+        @keyframes meeting-tap {
+          0%   { background: rgba(108,99,255,0.08); }
+          35%  { background: rgba(108,99,255,0.28); }
+          100% { background: rgba(108,99,255,0.15); }
+        }
         .db-recent-row {
           position: relative; display: flex; align-items: center;
           border-radius: 8px; flex-shrink: 0;
         }
+        .db-recent-row.tapping { animation: meeting-tap 0.4s ease forwards; }
         .db-recent-row:hover .db-recent-menu-btn { opacity: 1; }
         .db-recent-item {
           display: flex; align-items: flex-start; gap: 8px;
@@ -283,7 +290,11 @@ export default function Sidebar({ collapsed, onToggle, sidebarW }: SidebarProps)
     </div>
   ) : (
     meetings.map(meeting => (
-      <div key={meeting.id} className="db-recent-row">
+      <div
+        key={meeting.id}
+        className={`db-recent-row ${clickedId === meeting.id ? 'tapping' : ''}`}
+        onAnimationEnd={() => setClickedId(null)}
+      >
         {renaming === meeting.id ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 8px', flex: 1 }}>
             <input
@@ -304,7 +315,7 @@ export default function Sidebar({ collapsed, onToggle, sidebarW }: SidebarProps)
               href={`/meetings/${meeting.id}`}
               className={`db-recent-item ${pathname === `/meetings/${meeting.id}` ? 'active' : ''}`}
               title={meeting.title}
-              onClick={() => setMenuOpen(null)}
+              onClick={() => { setMenuOpen(null); setClickedId(meeting.id) }}
             >
               <span className="db-recent-dot" style={{ opacity: collapsed ? 0 : 1 }} />
               {(() => {
