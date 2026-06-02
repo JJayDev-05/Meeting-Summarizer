@@ -47,7 +47,7 @@ export default function ForgotPasswordPage() {
       <div className="auth-bg">
         <Link href="/" className="auth-logo">
           <div className="auth-logo-icon">✦</div>
-          <span className="auth-logo-text">MeetScribe</span>
+          <span className="auth-logo-text">Meeting Summarizer</span>
         </Link>
         <div className="auth-card">
           <div className="auth-title">Reset password</div>

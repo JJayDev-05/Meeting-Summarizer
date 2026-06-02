@@ -123,8 +123,8 @@ export default function SignupPage() {
 
       <div className="auth-bg">
         <Link href="/" className="auth-logo">
-          <img src="/logo.png" alt="MeetScribe" style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'contain' }} />
-          <span className="auth-logo-text">MeetScribe</span>
+          <img src="/logo.png" alt="Meeting Summarizer" style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'contain' }} />
+          <span className="auth-logo-text">Meeting Summarizer</span>
         </Link>
 
         <div className="auth-card">

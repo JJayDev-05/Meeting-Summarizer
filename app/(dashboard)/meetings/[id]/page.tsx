@@ -4,6 +4,7 @@ import { useParams, useRouter } from 'next/navigation'
 import PageLoader from '@/components/PageLoader'
 import Toast from '@/components/Toast'
 import { useToast } from '@/hooks/useToast'
+import { useMeetings } from '@/lib/meetings-context'
 
 interface ActionItem {
   id: string
@@ -29,6 +30,7 @@ export default function MeetingDetailPage() {
   const router = useRouter()
 
   const { toast, showToast, hideToast } = useToast()
+  const { meetings } = useMeetings()
   const [meeting, setMeeting] = useState<Meeting | null>(null)
   const [loading, setLoading] = useState(true)
   const [prevMeeting, setPrevMeeting] = useState<Meeting | null>(null)
@@ -36,28 +38,43 @@ export default function MeetingDetailPage() {
   const [actionItems, setActionItems] = useState<ActionItem[]>([])
   const prevId = useRef<string | null>(null)
 
-    useEffect(() => {
+  useEffect(() => {
     if (!id) return
-    if (prevId.current !== id) {
+    const idStr = id as string
+
+    if (prevId.current !== idStr) {
+      // New meeting selected — check context cache first for instant render
+      const cached = meetings.find(m => m.id === idStr)
+      if (cached) {
+        prevId.current = idStr
+        setMeeting(cached)
+        setActionItems(cached.action_items || [])
+        setLoading(false)
+        setNotFound(false)
+        return
+      }
+      // Not in context yet (direct URL) — fetch individually
       setLoading(true)
       setPrevMeeting(meeting)
       setMeeting(null)
-      prevId.current = id as string
+      setNotFound(false)
+      prevId.current = idStr
+
+      fetch(`/api/meetings/${idStr}`)
+        .then(res => {
+          if (!res.ok) { setNotFound(true); return null }
+          return res.json()
+        })
+        .then(data => {
+          if (data) {
+            setMeeting(data)
+            setActionItems(data.action_items || [])
+          }
+        })
+        .catch(() => setNotFound(true))
+        .finally(() => setLoading(false))
     }
-    fetch(`/api/meetings/${id}`)
-      .then(res => {
-        if (!res.ok) { setNotFound(true); return null }
-        return res.json()
-      })
-      .then(data => {
-        if (data) {
-          setMeeting(data)
-          setActionItems(data.action_items || [])
-        }
-      })
-      .catch(() => setNotFound(true))
-      .finally(() => setLoading(false))
-  }, [id])
+  }, [id, meetings])
 
   async function toggleActionItem(itemId: string, isDone: boolean) {
     setActionItems(prev =>

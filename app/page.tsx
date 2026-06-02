@@ -205,8 +205,8 @@ export default function Home() {
         {/* Nav */}
         <nav className="ms-nav">
           <Link href="/" className="ms-logo">
-            <img src="/logo.png" alt="MeetScribe" style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'contain' }} />
-            MeetScribe
+            <img src="/logo.png" alt="Meeting Summarizer" style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'contain' }} />
+            Meeting Summarizer
           </Link>
           <div className="ms-nav-right">
             <Link href="/login" className="ms-nav-link">Sign in</Link>
@@ -246,7 +246,7 @@ export default function Home() {
 
         {/* Footer */}
         <footer className="ms-footer">
-          <span>✦ MeetScribe</span>
+          <span>✦ Meeting Summarizer</span>
           <span>Built with Next.js · Supabase</span>
         </footer>
 

@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import SearchModal from '@/components/SearchModal'
+import { useMeetings } from '@/lib/meetings-context'
 
 interface SidebarProps {
   collapsed: boolean
@@ -11,42 +12,17 @@ interface SidebarProps {
   sidebarW: number
 }
 
-interface Meeting {
-  id: string
-  title: string
-  meeting_date: string | null
-  created_at: string
-}
 
 export default function Sidebar({ collapsed, onToggle, sidebarW }: SidebarProps) {
   const router = useRouter()
   const pathname = usePathname()
-  const [meetings, setMeetings] = useState<Meeting[]>([])
-  const [initialized, setInitialized] = useState(false)
+  const { meetings, initialized, updateMeeting, removeMeeting } = useMeetings()
   const [searchOpen, setSearchOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState<string | null>(null)
   const [renaming, setRenaming] = useState<string | null>(null)
   const [renameValue, setRenameValue] = useState('')
 
   const iconSize = collapsed ? 24 : 18
-
-  function fetchMeetings() {
-    fetch('/api/meetings')
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data)) {
-          setMeetings(data)
-          setInitialized(true)
-        }
-      })
-      .catch(() => {})
-  }
-
-  useEffect(() => {
-    fetchMeetings()
-    window.addEventListener('meeting-saved', fetchMeetings)
-    return () => window.removeEventListener('meeting-saved', fetchMeetings)
-  }, [])
 
   useEffect(() => {
     function handleClickOutside() { setMenuOpen(null) }
@@ -62,7 +38,7 @@ export default function Sidebar({ collapsed, onToggle, sidebarW }: SidebarProps)
   async function handleDelete(meetingId: string) {
     setMenuOpen(null)
     await fetch(`/api/meetings/${meetingId}`, { method: 'DELETE' })
-    setMeetings(prev => prev.filter(m => m.id !== meetingId))
+    removeMeeting(meetingId)
     if (pathname === `/meetings/${meetingId}`) router.push('/meetings/new')
   }
 
@@ -75,7 +51,7 @@ export default function Sidebar({ collapsed, onToggle, sidebarW }: SidebarProps)
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ title: renameValue }),
     })
-    setMeetings(prev => prev.map(m => m.id === meetingId ? { ...m, title: renameValue } : m))
+    updateMeeting(meetingId, { title: renameValue })
     setRenameValue('')
   }
 
@@ -244,11 +220,11 @@ export default function Sidebar({ collapsed, onToggle, sidebarW }: SidebarProps)
           <div className="db-logo">
   <img
     src="/logo.png"
-    alt="MeetScribe"
+    alt="Meeting Summarizer"
     style={{ width: 32, height: 32, borderRadius: 10, objectFit: 'contain', flexShrink: 0 }}
   />
   <span className="db-logo-text" style={{ opacity: collapsed ? 0 : 1 }}>
-    MeetScribe
+    Meeting Summarizer
   </span>
 </div>
           {!collapsed && (

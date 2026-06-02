@@ -55,7 +55,7 @@ export default function ResetPasswordPage() {
       <div className="auth-bg">
         <Link href="/" className="auth-logo">
           <div className="auth-logo-icon">✦</div>
-          <span className="auth-logo-text">MeetScribe</span>
+          <span className="auth-logo-text">Meeting Summarizer</span>
         </Link>
         <div className="auth-card">
           <div className="auth-title">Set new password</div>

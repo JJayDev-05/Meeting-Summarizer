@@ -1,14 +1,14 @@
-# MeetScribe — AI Meeting Notes Summarizer
+# Meeting Summarizer — AI Meeting Notes Summarizer
 
 > Paste messy meeting notes. Get a clean summary, key decisions, and action items with owners — in seconds.
 
-![MeetScribe](public/logo.png)
+![Meeting Summarizer](public/logo.png)
 
 ---
 
 ## Overview
 
-MeetScribe solves the most painful part of meetings: the aftermath. Instead of manually writing up notes, assigning tasks, and chasing people for what was decided, you paste your raw notes and the AI does it instantly.
+Meeting Summarizer solves the most painful part of meetings: the aftermath. Instead of manually writing up notes, assigning tasks, and chasing people for what was decided, you paste your raw notes and the AI does it instantly.
 
 Built as a full-stack portfolio project demonstrating end-to-end product thinking — from auth and database design to AI integration and production-ready UI.
 
@@ -177,7 +177,7 @@ hooks/
 
 ## Why I Built This
 
-Every company has meetings. Every meeting has follow-up chaos unclear notes, forgotten decisions, action items that fall through the cracks. MeetScribe automates the most painful 30 minutes after every meeting.
+Every company has meetings. Every meeting has follow-up chaos unclear notes, forgotten decisions, action items that fall through the cracks. Meeting Summarizer automates the most painful 30 minutes after every meeting.
 
 This project demonstrates:
 - Full-stack Next.js with App Router and Server Components
