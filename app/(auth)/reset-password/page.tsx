@@ -14,19 +14,22 @@ export default function ResetPasswordPage() {
   const [success, setSuccess] = useState(false)
 
   useEffect(() => {
-    // PKCE flow: Supabase redirects with ?code= in the URL
-    const code = new URLSearchParams(window.location.search).get('code')
-    if (code) {
-      supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
-        if (!error) setReady(true)
-        else setError('Reset link is invalid or has expired. Please request a new one.')
-      })
-      return
-    }
-
-    // Implicit flow: token arrives via hash fragment
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN') setReady(true)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session && (event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'PASSWORD_RECOVERY')) {
+        // createBrowserClient auto-exchanged the code, or implicit flow fired
+        setReady(true)
+      } else if (event === 'INITIAL_SESSION' && !session) {
+        // Auto-exchange didn't happen — try manual PKCE code exchange
+        const code = new URLSearchParams(window.location.search).get('code')
+        if (code) {
+          supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
+            if (error) setError('Reset link is invalid or has expired. Please request a new one.')
+            // on success, SIGNED_IN fires above and calls setReady(true)
+          })
+        } else {
+          setError('Reset link is invalid or has expired. Please request a new one.')
+        }
+      }
     })
     return () => subscription.unsubscribe()
   }, [])
