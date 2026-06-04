@@ -14,24 +14,17 @@ export default function ResetPasswordPage() {
   const [success, setSuccess] = useState(false)
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session && (event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'PASSWORD_RECOVERY')) {
-        // createBrowserClient auto-exchanged the code, or implicit flow fired
-        setReady(true)
-      } else if (event === 'INITIAL_SESSION' && !session) {
-        // Auto-exchange didn't happen — try manual PKCE code exchange
-        const code = new URLSearchParams(window.location.search).get('code')
-        if (code) {
-          supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
-            if (error) setError('Reset link is invalid or has expired. Please request a new one.')
-            // on success, SIGNED_IN fires above and calls setReady(true)
-          })
-        } else {
-          setError('Reset link is invalid or has expired. Please request a new one.')
-        }
-      }
+    // Check for error forwarded from the /api/auth/callback route
+    const urlError = new URLSearchParams(window.location.search).get('error')
+    if (urlError) {
+      setError('Reset link is invalid or has expired. Please request a new one.')
+      return
+    }
+    // Session was already established server-side by the callback route
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) setReady(true)
+      else setError('Reset link is invalid or has expired. Please request a new one.')
     })
-    return () => subscription.unsubscribe()
   }, [])
 
   async function handleReset() {
