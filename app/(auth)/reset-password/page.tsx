@@ -14,17 +14,25 @@ export default function ResetPasswordPage() {
   const [success, setSuccess] = useState(false)
 
   useEffect(() => {
-    // Check for error forwarded from the /api/auth/callback route
-    const urlError = new URLSearchParams(window.location.search).get('error')
-    if (urlError) {
-      setError(decodeURIComponent(urlError))
-      return
-    }
-    // Session was already established server-side by the callback route
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) setReady(true)
-      else setError('Reset link is invalid or has expired. Please request a new one.')
+    const params = new URLSearchParams(window.location.search)
+    const hasCode = params.has('code')
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        setReady(true)
+      } else if (event === 'INITIAL_SESSION') {
+        if (session) {
+          // Code was already exchanged before we subscribed
+          setReady(true)
+        } else if (!hasCode) {
+          // No code in URL and no session — direct invalid access
+          setError('Reset link is invalid or has expired. Please request a new one.')
+        }
+        // else: hasCode but no session yet — wait for PASSWORD_RECOVERY
+      }
     })
+
+    return () => subscription.unsubscribe()
   }, [])
 
   async function handleReset() {
