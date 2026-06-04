@@ -2,6 +2,8 @@
 
 > Paste messy meeting notes. Get a clean summary, key decisions, and action items with owners — in seconds.
 
+**[Live Demo →](https://project-meetingsummarizer.vercel.app)**
+
 ![Meeting Summarizer](public/logo.png)
 
 ---
@@ -22,10 +24,14 @@ Built as a full-stack portfolio project demonstrating end-to-end product thinkin
 - **Check off action items** — Mark tasks done with optimistic UI updates
 - **Meeting history** — All meetings saved, searchable, accessible from sidebar
 - **Rename & delete meetings** — Inline rename with keyboard support
-- **Auth** — Email/password signup, login, forgot password, reset password
-- **Row Level Security** — Every user only sees their own data
-- **JWT protection** — All routes and API endpoints secured via proxy middleware
-- **Responsive sidebar** — Collapsible, with search modal and recents list
+- **Inline editing** — Edit meeting title, date, and notes directly on the detail page
+- **Re-summarize** — Re-run AI on edited notes with one click
+- **Delete confirmation** — Modal confirmation before deleting meetings
+- **Empty state** — Helpful onboarding for first-time users
+- **Auth** — Email/password signup, login, forgot password, reset password (PKCE flow)
+- **Row Level Security** — Every user only sees their own data via Supabase RLS
+- **Mobile responsive** — Collapsible sidebar with hamburger menu on small screens
+- **Error boundary** — Graceful recovery screen on unexpected crashes
 
 ---
 
@@ -40,7 +46,7 @@ Built as a full-stack portfolio project demonstrating end-to-end product thinkin
 | AI | Groq API (LLaMA 3.3 70B) |
 | Styling | Tailwind CSS + custom CSS design system |
 | Fonts | Syne + DM Sans (Google Fonts via Next.js) |
-| Deployment | Vercel (planned) |
+| Deployment | Vercel |
 
 ---
 
@@ -88,8 +94,8 @@ Row Level Security enabled on both tables — users only access their own data.
 ### Installation
 
 ```bash
-git clone https://github.com/yourusername/meetscribe.git
-cd meetscribe
+git clone https://github.com/JJayDev-05/Project-MeetScribe.git
+cd Project-MeetScribe
 npm install
 ```
 
@@ -101,6 +107,7 @@ Create `.env.local`:
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 GROQ_API_KEY=your_groq_api_key
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
 
 ### Database Setup
@@ -192,4 +199,4 @@ This project demonstrates:
 **Joebert Jay Jimena**
 Full-stack developer
 
-[GitHub](https://github.com/JJayDev-05) · [LinkedIn](https://linkedin.com/in/yourprofile)
+[GitHub](https://github.com/JJayDev-05)

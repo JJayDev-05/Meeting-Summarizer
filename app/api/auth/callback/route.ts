@@ -28,7 +28,8 @@ export async function GET(request: NextRequest) {
     if (!error) {
       return NextResponse.redirect(`${origin}${next}`)
     }
+    return NextResponse.redirect(`${origin}/reset-password?error=${encodeURIComponent(error.message)}`)
   }
 
-  return NextResponse.redirect(`${origin}/reset-password?error=invalid`)
+  return NextResponse.redirect(`${origin}/reset-password?error=no_code`)
 }

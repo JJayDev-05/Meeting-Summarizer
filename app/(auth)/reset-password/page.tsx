@@ -17,7 +17,7 @@ export default function ResetPasswordPage() {
     // Check for error forwarded from the /api/auth/callback route
     const urlError = new URLSearchParams(window.location.search).get('error')
     if (urlError) {
-      setError('Reset link is invalid or has expired. Please request a new one.')
+      setError(decodeURIComponent(urlError))
       return
     }
     // Session was already established server-side by the callback route
