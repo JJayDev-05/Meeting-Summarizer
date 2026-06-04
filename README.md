@@ -2,7 +2,7 @@
 
 > Paste messy meeting notes. Get a clean summary, key decisions, and action items with owners — in seconds.
 
-**[Live Demo →](https://project-meetingsummarizer.vercel.app)**
+**[Live Demo →](https://meeting-summarizer-phi-sepia.vercel.app/)**
 
 ![Meeting Summarizer](public/logo.png)
 
@@ -94,8 +94,8 @@ Row Level Security enabled on both tables — users only access their own data.
 ### Installation
 
 ```bash
-git clone https://github.com/JJayDev-05/Project-MeetScribe.git
-cd Project-MeetScribe
+git clone https://github.com/JJayDev-05/Meeting-Summarizer.git
+cd Meeting-Summarizer
 npm install
 ```
 
