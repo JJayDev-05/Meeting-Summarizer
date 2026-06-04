@@ -14,24 +14,13 @@ export default function ResetPasswordPage() {
   const [success, setSuccess] = useState(false)
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const hasCode = params.has('code')
-
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'PASSWORD_RECOVERY') {
+      if (event === 'PASSWORD_RECOVERY' || (event === 'INITIAL_SESSION' && session)) {
         setReady(true)
-      } else if (event === 'INITIAL_SESSION') {
-        if (session) {
-          // Code was already exchanged before we subscribed
-          setReady(true)
-        } else if (!hasCode) {
-          // No code in URL and no session — direct invalid access
-          setError('Reset link is invalid or has expired. Please request a new one.')
-        }
-        // else: hasCode but no session yet — wait for PASSWORD_RECOVERY
+      } else if (event === 'INITIAL_SESSION' && !session) {
+        setError('Reset link is invalid or has expired. Please request a new one.')
       }
     })
-
     return () => subscription.unsubscribe()
   }, [])
 
