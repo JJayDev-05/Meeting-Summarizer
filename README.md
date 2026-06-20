@@ -160,28 +160,6 @@ Open [http://localhost:3000](http://localhost:3000)
 
 ---
 
-## Project Structure
-
-app/
-(auth)/          # Login, signup, forgot/reset password
-(dashboard)/
-    meetings/
-        layout.tsx   # Persistent sidebar layout
-        new/         # New meeting + AI summarize
-        [id]/        # Meeting detail page
-api/
-    meetings/      # CRUD endpoints
-    action-items/  # Toggle done/undone
-    ai/summarize/  # Groq AI endpoint
-components/
-    Sidebar.tsx      # Collapsible sidebar with search + recents
-    SearchModal.tsx  # Full search modal
-    Toast.tsx        # Toast notifications
-    PageLoader.tsx   # Loading states
-hooks/
-    useToast.ts      # Toast hook
----
-
 ## Why I Built This
 
 Every company has meetings. Every meeting has follow-up chaos unclear notes, forgotten decisions, action items that fall through the cracks. Meeting Summarizer automates the most painful 30 minutes after every meeting.
