@@ -44,7 +44,7 @@ Built as a full-stack portfolio project demonstrating end-to-end product thinkin
 | Database | Supabase (PostgreSQL) |
 | Auth | Supabase Auth |
 | AI | Groq API (LLaMA 3.3 70B) |
-| Styling | Tailwind CSS + custom CSS design system |
+| Styling | Tailwind CSS v4 + shadcn/ui |
 | Fonts | Syne + DM Sans (Google Fonts via Next.js) |
 | Deployment | Vercel |
 
@@ -190,7 +190,7 @@ This project demonstrates:
 - Full-stack Next.js with App Router and Server Components
 - Real AI integration (not just a wrapper — structured JSON output parsing)
 - Production auth with JWT, RLS, and password reset flow
-- Clean UI/UX decisions built from scratch without a component library
+- Clean UI/UX with shadcn/ui components and Tailwind CSS v4
 
 ---
 
