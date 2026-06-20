@@ -2,7 +2,7 @@
 
 > Paste messy meeting notes. Get a clean summary, key decisions, and action items with owners — in seconds.
 
-**[Live Demo →](https://meeting-summarizer-phi-sepia.vercel.app/)**
+**[Live Demo →](https://meetingsummarizer-eight.vercel.app/)**
 
 ![Meeting Summarizer](public/logo.png)
 
