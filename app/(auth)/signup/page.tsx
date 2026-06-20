@@ -10,7 +10,6 @@ export default function SignupPage() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [success, setSuccess] = useState(false)
   const router = useRouter()
 
   async function handleSignup() {
@@ -19,7 +18,7 @@ export default function SignupPage() {
     setLoading(true)
     const { error } = await supabase.auth.signUp({ email, password })
     if (error) { setError(error.message); setLoading(false); return }
-    setSuccess(true)
+    router.push('/meetings')
   }
 
   return (
@@ -173,23 +172,7 @@ export default function SignupPage() {
         </div>
       )}
 
-      {/* Success modal */}
-      {success && (
-        <div className="auth-modal-overlay">
-          <div className="auth-modal" style={{ border: '1px solid rgba(34,211,165,0.25)' }}>
-            <div className="auth-modal-icon" style={{ background: 'rgba(34,211,165,0.12)' }}>
-              <svg fill="none" viewBox="0 0 24 24" stroke="#22d3a5" strokeWidth={2} width={20} height={20}>
-                <path d="M5 13l4 4L19 7"/>
-              </svg>
-            </div>
-            <div className="auth-modal-title">Check your email</div>
-            <div className="auth-modal-msg">We sent a confirmation link to <strong style={{ color: '#f0f2ff' }}>{email}</strong>. Click it to activate your account.</div>
-            <button className="auth-modal-btn" style={{ background: '#22d3a5', color: '#0a1628' }} onClick={() => router.push('/login')}>Go to sign in</button>
-          </div>
-        </div>
-      )}
-
-      <div className="auth-bg">
+<div className="auth-bg">
         <Link href="/" className="auth-logo">
           <img src="/logo.png" alt="Meeting Summarizer" style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'contain' }} />
           <span className="auth-logo-text">Meeting Summarizer</span>
