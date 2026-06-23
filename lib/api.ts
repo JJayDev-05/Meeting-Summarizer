@@ -38,3 +38,17 @@ export async function summarizeMeeting(notes: string) {
   if (!res.ok) throw new Error('Failed to summarize')
   return res.json()
 }
+
+// RAG: ask a question answered from the user's past meetings
+export async function askMeetings(question: string) {
+  const res = await fetch('/api/ai/ask', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ question }),
+  })
+  if (!res.ok) throw new Error('Failed to get an answer')
+  return res.json() as Promise<{
+    answer: string
+    sources: { id: string; title: string; meeting_date: string | null }[]
+  }>
+}

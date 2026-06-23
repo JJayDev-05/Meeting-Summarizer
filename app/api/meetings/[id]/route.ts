@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { indexMeeting } from '@/lib/rag-ingest'
 
 async function createClient() {
   const cookieStore = await cookies()
@@ -81,6 +82,20 @@ export async function PATCH(
         }))
       )
       if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+  }
+
+  // Re-index for RAG search if any embeddable field changed.
+  if (['title', 'raw_notes', 'ai_summary'].some((k) => k in meetingUpdate)) {
+    try {
+      const { data: m } = await supabase
+        .from('meetings')
+        .select('id, user_id, title, raw_notes, ai_summary')
+        .eq('id', id)
+        .single()
+      if (m) await indexMeeting(supabase, m)
+    } catch (e) {
+      console.error('RAG re-index failed:', e)
     }
   }
 

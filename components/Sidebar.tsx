@@ -347,6 +347,14 @@ export default function Sidebar({ collapsed, onToggle, sidebarW, isMobile = fals
           <span className="db-nav-label" style={{ opacity: collapsed ? 0 : 1 }}>Search</span>
         </button>
 
+        {/* Ask AI */}
+        <Link href="/meetings/ask" className={`db-nav-btn ${pathname === '/meetings/ask' ? 'active' : ''}`} title="Ask your meetings">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} width={iconSize} height={iconSize}>
+            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          <span className="db-nav-label" style={{ opacity: collapsed ? 0 : 1 }}>Ask AI</span>
+        </Link>
+
         <div className="db-divider" />
 
         {/* Recents label */}

@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { indexMeeting } from '@/lib/rag-ingest'
 
 async function createClient() {
   const cookieStore = await cookies()
@@ -71,6 +72,13 @@ export async function POST(request: Request) {
         }))
       )
     if (itemsError) return NextResponse.json({ error: itemsError.message }, { status: 500 })
+  }
+
+  // Index the meeting for RAG search. Don't fail the request if embedding hiccups.
+  try {
+    await indexMeeting(supabase, { id: meeting.id, user_id: user.id, title, raw_notes, ai_summary })
+  } catch (e) {
+    console.error('RAG index failed:', e)
   }
 
   return NextResponse.json(meeting, { status: 201 })
